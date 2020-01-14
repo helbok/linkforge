@@ -1,0 +1,26 @@
+# Build output
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+
+# IDE
+.vs/
+.idea/
+*.user
+*.suo
+*.userosscache
+
+# Test results
+TestResults/
+coverage/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local data produced by the CLI
+*.db
+*.db-shm
+*.db-wal
+links.json
