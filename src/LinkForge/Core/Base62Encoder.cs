@@ -14,6 +14,11 @@ public sealed class Base62Encoder
             throw new ArgumentOutOfRangeException(nameof(id), "Identifier must be non-negative.");
         }
 
+        if (id == 0)
+        {
+            return Alphabet[0].ToString();
+        }
+
         var stack = new Stack<char>();
 
         while (id > 0)
@@ -27,6 +32,11 @@ public sealed class Base62Encoder
 
     public long Decode(string code)
     {
+        if (string.IsNullOrWhiteSpace(code))
+        {
+            throw new ArgumentException("Code must not be empty.", nameof(code));
+        }
+
         long result = 0;
 
         foreach (char c in code)
