@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace LinkForge.Core;
 
-public sealed class Base62Encoder
+public sealed class Base62Encoder : IIdEncoder
 {
     private const string Alphabet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
