@@ -25,6 +25,15 @@ public class ShortenerServiceTests
         Assert.Null(_service.Resolve("does-not-exist"));
     }
 
+    [Fact]
+    public void Shorten_same_destination_returns_same_code()
+    {
+        var first = _service.Shorten("https://example.com/dup");
+        var second = _service.Shorten("https://example.com/dup");
+
+        Assert.Equal(first.Code, second.Code);
+    }
+
     private static ShortenerService CreateService()
     {
         var store = new InMemoryUrlStore();
