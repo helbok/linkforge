@@ -1,4 +1,5 @@
 using System;
+using LinkForge.Cli;
 
 namespace LinkForge;
 
@@ -6,7 +7,7 @@ internal static class Program
 {
     private static int Main(string[] args)
     {
-        Console.WriteLine("LinkForge — URL shortener (work in progress).");
-        return 0;
+        var runner = new ConsoleRunner();
+        return runner.Run(args);
     }
 }
