@@ -56,8 +56,13 @@ public sealed class ConsoleRunner
         catch (ArgumentException ex)
         {
             Console.Error.WriteLine($"Error: {ex.Message}");
-            PrintUsage();
+            Console.Error.WriteLine("Run 'linkforge help' for usage.");
             return 2;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Unexpected error: {ex.Message}");
+            return 3;
         }
     }
 
