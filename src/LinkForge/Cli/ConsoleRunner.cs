@@ -19,39 +19,7 @@ public sealed class ConsoleRunner
     {
         try
         {
-            Command command = ArgumentParser.Parse(args);
-
-            switch (command)
-            {
-                case ShortenCommand shorten:
-                    var link = _service.Shorten(shorten.Url);
-                    Console.WriteLine($"Shortened: {shorten.Url}");
-                    Console.WriteLine($"Code:      {link.Code}");
-                    return 0;
-
-                case ResolveCommand resolve:
-                    var resolved = _service.Resolve(resolve.Code);
-
-                    if (resolved is null)
-                    {
-                        Console.Error.WriteLine($"No link found for code '{resolve.Code}'.");
-                        return 1;
-                    }
-
-                    Console.WriteLine(resolved.Destination);
-                    return 0;
-
-                case ListCommand:
-                    foreach (var link in _service.List())
-                    {
-                        Console.WriteLine($"{link.Code}\t{link.Destination}");
-                    }
-                    return 0;
-
-                default:
-                    PrintUsage();
-                    return 0;
-            }
+            return Execute(ArgumentParser.Parse(args));
         }
         catch (ArgumentException ex)
         {
@@ -64,6 +32,56 @@ public sealed class ConsoleRunner
             Console.Error.WriteLine($"Unexpected error: {ex.Message}");
             return 3;
         }
+    }
+
+    private int Execute(Command command)
+    {
+        switch (command)
+        {
+            case ShortenCommand shorten:
+                return ExecuteShorten(shorten);
+
+            case ResolveCommand resolve:
+                return ExecuteResolve(resolve);
+
+            case ListCommand:
+                return ExecuteList();
+
+            default:
+                PrintUsage();
+                return 0;
+        }
+    }
+
+    private int ExecuteShorten(ShortenCommand shorten)
+    {
+        var link = _service.Shorten(shorten.Url);
+        Console.WriteLine($"Shortened: {shorten.Url}");
+        Console.WriteLine($"Code:      {link.Code}");
+        return 0;
+    }
+
+    private int ExecuteResolve(ResolveCommand resolve)
+    {
+        var resolved = _service.Resolve(resolve.Code);
+
+        if (resolved is null)
+        {
+            Console.Error.WriteLine($"No link found for code '{resolve.Code}'.");
+            return 1;
+        }
+
+        Console.WriteLine(resolved.Destination);
+        return 0;
+    }
+
+    private int ExecuteList()
+    {
+        foreach (var link in _service.List())
+        {
+            Console.WriteLine($"{link.Code}\t{link.Destination}");
+        }
+        return 0;
     }
 
     private static void PrintUsage()
