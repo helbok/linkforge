@@ -37,9 +37,18 @@ public sealed class JsonUrlStore : IUrlStore
     {
         string json = JsonSerializer.Serialize(links, Options);
 
-        // Bug (fixed in the next commit): writes directly to the target file,
-        // so a crash mid-write can leave a truncated, corrupt store.
-        File.WriteAllText(_path, json);
+        string directory = Path.GetDirectoryName(_path);
+
+        if (!string.IsNullOrEmpty(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        // Write to a temp file first, then atomically move it into place so a
+        // crash mid-write can never leave a truncated store behind.
+        string tempPath = _path + ".tmp";
+        File.WriteAllText(tempPath, json);
+        File.Move(tempPath, _path, overwrite: true);
     }
 
     public ShortLink? Get(string code)
