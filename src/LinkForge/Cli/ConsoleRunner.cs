@@ -10,7 +10,7 @@ public sealed class ConsoleRunner
 
     public ConsoleRunner()
     {
-        var store = new InMemoryUrlStore();
+        var store = UrlStoreFactory.Create(new ShortenerOptions());
         var encoder = new Base62Encoder();
         _service = new ShortenerService(encoder, store);
     }
