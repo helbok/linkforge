@@ -17,6 +17,8 @@ public sealed class ShortenerService
 
     public ShortLink Shorten(string destination)
     {
+        UrlValidator.Validate(destination);
+
         foreach (var link in _store.List())
         {
             if (string.Equals(link.Destination, destination, StringComparison.Ordinal))

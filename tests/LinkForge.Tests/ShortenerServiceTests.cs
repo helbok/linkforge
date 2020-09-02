@@ -34,6 +34,12 @@ public class ShortenerServiceTests
         Assert.Equal(first.Code, second.Code);
     }
 
+    [Fact]
+    public void Shorten_rejects_invalid_url()
+    {
+        Assert.Throws<ArgumentException>(() => _service.Shorten("not-a-url"));
+    }
+
     private static ShortenerService CreateService()
     {
         var store = new InMemoryUrlStore();
