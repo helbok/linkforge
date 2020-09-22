@@ -4,11 +4,19 @@ namespace LinkForge.Core;
 
 public static class UrlValidator
 {
-    public static void Validate(string? url)
+    public const int DefaultMaxLength = 2048;
+
+    public static void Validate(string? url, int maxLength)
     {
         if (string.IsNullOrWhiteSpace(url))
         {
             throw new ArgumentException("URL must not be empty.", nameof(url));
+        }
+
+        if (url!.Length > maxLength)
+        {
+            throw new ArgumentException(
+                $"URL must be at most {maxLength} characters long.", nameof(url));
         }
 
         if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) ||

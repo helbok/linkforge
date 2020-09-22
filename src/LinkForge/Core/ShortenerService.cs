@@ -17,7 +17,7 @@ public sealed class ShortenerService
 
     public ShortLink Shorten(string destination)
     {
-        UrlValidator.Validate(destination);
+        UrlValidator.Validate(destination, UrlValidator.DefaultMaxLength);
 
         foreach (var link in _store.List())
         {
