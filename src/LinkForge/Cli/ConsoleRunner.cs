@@ -55,7 +55,7 @@ public sealed class ConsoleRunner
 
     private int ExecuteShorten(ShortenCommand shorten)
     {
-        var link = _service.Shorten(shorten.Url);
+        var link = _service.Shorten(shorten.Url, shorten.CustomCode);
         Console.WriteLine($"Shortened: {shorten.Url}");
         Console.WriteLine($"Code:      {link.Code}");
         return 0;

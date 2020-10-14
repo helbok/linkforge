@@ -15,9 +15,19 @@ public sealed class ShortenerService
         _store = store ?? throw new ArgumentNullException(nameof(store));
     }
 
-    public ShortLink Shorten(string destination)
+    public ShortLink Shorten(string destination, string? customCode = null)
     {
         UrlValidator.Validate(destination, UrlValidator.DefaultMaxLength);
+
+        if (!string.IsNullOrEmpty(customCode))
+        {
+            ValidateCustomCode(customCode);
+
+            if (_store.Get(customCode) != null)
+            {
+                throw new InvalidOperationException($"Code '{customCode}' is already in use.");
+            }
+        }
 
         foreach (var link in _store.List())
         {
@@ -27,7 +37,7 @@ public sealed class ShortenerService
             }
         }
 
-        string code = _encoder.Encode(_nextId++);
+        string code = customCode ?? _encoder.Encode(_nextId++);
 
         var created = new ShortLink
         {
@@ -49,5 +59,23 @@ public sealed class ShortenerService
     public IReadOnlyList<ShortLink> List()
     {
         return _store.List();
+    }
+
+    private static void ValidateCustomCode(string code)
+    {
+        if (code.Length > 32)
+        {
+            throw new ArgumentException(
+                "Custom codes must be at most 32 characters long.", nameof(code));
+        }
+
+        foreach (char c in code)
+        {
+            if (!char.IsLetterOrDigit(c) && c != '-' && c != '_')
+            {
+                throw new ArgumentException(
+                    "Custom codes may only contain letters, digits, '-' and '_'.", nameof(code));
+            }
+        }
     }
 }

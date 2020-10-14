@@ -40,6 +40,23 @@ public class ShortenerServiceTests
         Assert.Throws<ArgumentException>(() => _service.Shorten("not-a-url"));
     }
 
+    [Fact]
+    public void Shorten_with_custom_code_uses_it()
+    {
+        var link = _service.Shorten("https://example.com", customCode: "home");
+
+        Assert.Equal("home", link.Code);
+    }
+
+    [Fact]
+    public void Shorten_rejects_duplicate_custom_code()
+    {
+        _service.Shorten("https://example.com/one", customCode: "home");
+
+        Assert.Throws<InvalidOperationException>(
+            () => _service.Shorten("https://example.com/two", customCode: "home"));
+    }
+
     private static ShortenerService CreateService()
     {
         var store = new InMemoryUrlStore();

@@ -22,6 +22,15 @@ public class ArgumentParserTests
     }
 
     [Fact]
+    public void Parse_shorten_reads_custom_code()
+    {
+        var command = Assert.IsType<ShortenCommand>(
+            ArgumentParser.Parse(new[] { "shorten", "https://example.com", "--code", "home" }));
+
+        Assert.Equal("home", command.CustomCode);
+    }
+
+    [Fact]
     public void Parse_shorten_without_url_throws()
     {
         Assert.Throws<ArgumentException>(() => ArgumentParser.Parse(new[] { "shorten" }));

@@ -11,6 +11,7 @@ public sealed class ShortenCommand : Command
 {
     public override string Name => "shorten";
     public string Url { get; set; } = string.Empty;
+    public string? CustomCode { get; set; }
 }
 
 public sealed class ResolveCommand : Command
@@ -63,10 +64,25 @@ public static class ArgumentParser
     {
         if (args.Length < 2)
         {
-            throw new ArgumentException("Usage: shorten <url>");
+            throw new ArgumentException("Usage: shorten <url> [--code <code>]");
         }
 
-        return new ShortenCommand { Url = args[1] };
+        var command = new ShortenCommand { Url = args[1] };
+
+        for (int i = 2; i < args.Length; i++)
+        {
+            switch (args[i])
+            {
+                case "--code":
+                    command.CustomCode = RequireValue(args, ref i, "--code");
+                    break;
+
+                default:
+                    throw new ArgumentException($"Unknown option '{args[i]}'.");
+            }
+        }
+
+        return command;
     }
 
     private static Command ParseResolve(string[] args)
@@ -77,5 +93,16 @@ public static class ArgumentParser
         }
 
         return new ResolveCommand { Code = args[1] };
+    }
+
+    private static string RequireValue(string[] args, ref int index, string option)
+    {
+        if (index + 1 >= args.Length)
+        {
+            throw new ArgumentException($"Option {option} requires a value.");
+        }
+
+        index++;
+        return args[index];
     }
 }
