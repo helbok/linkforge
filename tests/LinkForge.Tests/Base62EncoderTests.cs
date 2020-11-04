@@ -18,6 +18,7 @@ public class Base62EncoderTests
     [InlineData(61, "Z")]
     [InlineData(62, "10")]
     [InlineData(3844, "100")]
+    [InlineData(238328, "1000")]
     public void Encode_returns_expected_value(long id, string expected)
     {
         Assert.Equal(expected, _encoder.Encode(id));
@@ -27,6 +28,22 @@ public class Base62EncoderTests
     public void Decode_reverses_encode_for_a_range_of_ids()
     {
         for (long id = 0; id < 10_000; id++)
+        {
+            Assert.Equal(id, _encoder.Decode(_encoder.Encode(id)));
+        }
+    }
+
+    [Fact]
+    public void Encode_and_decode_round_trips_large_ids()
+    {
+        long[] ids =
+        {
+            62L * 62L * 62L - 1,
+            62L * 62L * 62L * 62L * 62L - 1,
+            long.MaxValue
+        };
+
+        foreach (long id in ids)
         {
             Assert.Equal(id, _encoder.Decode(_encoder.Encode(id)));
         }
