@@ -11,7 +11,7 @@ public class UrlValidatorTests
     [InlineData("http://example.com/path?q=1")]
     public void Validate_accepts_http_and_https(string url)
     {
-        UrlValidator.Validate(url, UrlValidator.DefaultMaxLength);
+        UrlValidator.Validate(url, ShortenerOptions.DefaultMaxUrlLength);
     }
 
     [Theory]
@@ -23,7 +23,7 @@ public class UrlValidatorTests
     public void Validate_rejects_non_http_urls(string url)
     {
         Assert.Throws<ArgumentException>(
-            () => UrlValidator.Validate(url, UrlValidator.DefaultMaxLength));
+            () => UrlValidator.Validate(url, ShortenerOptions.DefaultMaxUrlLength));
     }
 
     [Fact]
@@ -32,6 +32,6 @@ public class UrlValidatorTests
         string tooLong = "https://example.com/" + new string('a', 2048);
 
         Assert.Throws<ArgumentException>(
-            () => UrlValidator.Validate(tooLong, UrlValidator.DefaultMaxLength));
+            () => UrlValidator.Validate(tooLong, ShortenerOptions.DefaultMaxUrlLength));
     }
 }

@@ -59,7 +59,8 @@ public class ShortenerServiceTests
 
     private static ShortenerService CreateService()
     {
+        var options = new ShortenerOptions();
         var store = new InMemoryUrlStore();
-        return new ShortenerService(new Base62Encoder(), store);
+        return new ShortenerService(new Base62Encoder(), store, options);
     }
 }

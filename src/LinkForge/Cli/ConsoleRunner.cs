@@ -10,9 +10,10 @@ public sealed class ConsoleRunner
 
     public ConsoleRunner()
     {
-        var store = UrlStoreFactory.Create(new ShortenerOptions());
+        var options = new ShortenerOptions();
+        var store = UrlStoreFactory.Create(options);
         var encoder = new Base62Encoder();
-        _service = new ShortenerService(encoder, store);
+        _service = new ShortenerService(encoder, store, options);
     }
 
     public int Run(string[] args)

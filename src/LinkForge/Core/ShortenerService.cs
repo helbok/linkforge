@@ -7,17 +7,19 @@ public sealed class ShortenerService
 {
     private readonly IIdEncoder _encoder;
     private readonly IUrlStore _store;
+    private readonly ShortenerOptions _options;
     private long _nextId = 1;
 
-    public ShortenerService(IIdEncoder encoder, IUrlStore store)
+    public ShortenerService(IIdEncoder encoder, IUrlStore store, ShortenerOptions options)
     {
         _encoder = encoder ?? throw new ArgumentNullException(nameof(encoder));
         _store = store ?? throw new ArgumentNullException(nameof(store));
+        _options = options ?? throw new ArgumentNullException(nameof(options));
     }
 
     public ShortLink Shorten(string destination, string? customCode = null)
     {
-        UrlValidator.Validate(destination, UrlValidator.DefaultMaxLength);
+        UrlValidator.Validate(destination, _options.MaxUrlLength);
 
         if (!string.IsNullOrEmpty(customCode))
         {

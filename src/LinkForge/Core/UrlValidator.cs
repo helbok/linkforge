@@ -4,8 +4,6 @@ namespace LinkForge.Core;
 
 public static class UrlValidator
 {
-    public const int DefaultMaxLength = 2048;
-
     public static void Validate(string? url, int maxLength)
     {
         if (string.IsNullOrWhiteSpace(url))
