@@ -24,4 +24,9 @@ jobs:
         run: dotnet build --no-restore --configuration Release
 
       - name: Test
-        run: dotnet test --no-build --configuration Release
+        run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage"
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v1
+        with:
+          files: '**/coverage.cobertura.xml'
