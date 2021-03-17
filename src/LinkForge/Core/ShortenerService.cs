@@ -17,7 +17,7 @@ public sealed class ShortenerService
         _options = options ?? throw new ArgumentNullException(nameof(options));
     }
 
-    public ShortLink Shorten(string destination, string? customCode = null)
+    public ShortLink Shorten(string destination, string? customCode = null, TimeSpan? ttl = null)
     {
         UrlValidator.Validate(destination, _options.MaxUrlLength);
 
@@ -45,7 +45,8 @@ public sealed class ShortenerService
         {
             Code = code,
             Destination = destination,
-            CreatedAt = DateTimeOffset.UtcNow
+            CreatedAt = DateTimeOffset.UtcNow,
+            ExpiresAt = ttl.HasValue ? DateTimeOffset.UtcNow.Add(ttl.Value) : (DateTimeOffset?)null
         };
 
         _store.Put(created);

@@ -12,6 +12,7 @@ public sealed class ShortenCommand : Command
     public override string Name => "shorten";
     public string Url { get; set; } = string.Empty;
     public string? CustomCode { get; set; }
+    public int? TtlDays { get; set; }
 }
 
 public sealed class ResolveCommand : Command
@@ -64,7 +65,7 @@ public static class ArgumentParser
     {
         if (args.Length < 2)
         {
-            throw new ArgumentException("Usage: shorten <url> [--code <code>]");
+            throw new ArgumentException("Usage: shorten <url> [--code <code>] [--ttl <days>]");
         }
 
         var command = new ShortenCommand { Url = args[1] };
@@ -75,6 +76,17 @@ public static class ArgumentParser
             {
                 case "--code":
                     command.CustomCode = RequireValue(args, ref i, "--code");
+                    break;
+
+                case "--ttl":
+                    string value = RequireValue(args, ref i, "--ttl");
+
+                    if (!int.TryParse(value, out int days) || days <= 0)
+                    {
+                        throw new ArgumentException("--ttl expects a positive number of days.");
+                    }
+
+                    command.TtlDays = days;
                     break;
 
                 default:

@@ -57,6 +57,15 @@ public class ShortenerServiceTests
             () => _service.Shorten("https://example.com/two", customCode: "home"));
     }
 
+    [Fact]
+    public void Shorten_with_ttl_sets_expiry()
+    {
+        var link = _service.Shorten("https://example.com/ttl", ttl: TimeSpan.FromDays(30));
+
+        Assert.NotNull(link.ExpiresAt);
+        Assert.True(link.ExpiresAt > System.DateTimeOffset.UtcNow);
+    }
+
     private static ShortenerService CreateService()
     {
         var options = new ShortenerOptions();

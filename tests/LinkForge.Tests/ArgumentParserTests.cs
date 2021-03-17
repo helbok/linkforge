@@ -31,6 +31,15 @@ public class ArgumentParserTests
     }
 
     [Fact]
+    public void Parse_shorten_reads_ttl()
+    {
+        var command = Assert.IsType<ShortenCommand>(
+            ArgumentParser.Parse(new[] { "shorten", "https://example.com", "--ttl", "30" }));
+
+        Assert.Equal(30, command.TtlDays);
+    }
+
+    [Fact]
     public void Parse_shorten_without_url_throws()
     {
         Assert.Throws<ArgumentException>(() => ArgumentParser.Parse(new[] { "shorten" }));

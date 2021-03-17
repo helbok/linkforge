@@ -56,9 +56,19 @@ public sealed class ConsoleRunner
 
     private int ExecuteShorten(ShortenCommand shorten)
     {
-        var link = _service.Shorten(shorten.Url, shorten.CustomCode);
+        var ttl = shorten.TtlDays.HasValue
+            ? TimeSpan.FromDays(shorten.TtlDays.Value)
+            : (TimeSpan?)null;
+
+        var link = _service.Shorten(shorten.Url, shorten.CustomCode, ttl);
         Console.WriteLine($"Shortened: {shorten.Url}");
         Console.WriteLine($"Code:      {link.Code}");
+
+        if (link.ExpiresAt.HasValue)
+        {
+            Console.WriteLine($"Expires:   {link.ExpiresAt:O}");
+        }
+
         return 0;
     }
 

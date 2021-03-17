@@ -9,4 +9,6 @@ public sealed class ShortLink
     public string Destination { get; set; } = string.Empty;
 
     public DateTimeOffset CreatedAt { get; set; }
+
+    public DateTimeOffset? ExpiresAt { get; set; }
 }
