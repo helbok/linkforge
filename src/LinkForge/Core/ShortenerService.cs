@@ -56,7 +56,14 @@ public sealed class ShortenerService
 
     public ShortLink? Resolve(string code)
     {
-        return _store.Get(code);
+        var link = _store.Get(code);
+
+        if (link == null || link.IsExpiredAt(DateTimeOffset.UtcNow))
+        {
+            return null;
+        }
+
+        return link;
     }
 
     public IReadOnlyList<ShortLink> List()

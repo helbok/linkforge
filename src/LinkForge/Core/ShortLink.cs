@@ -11,4 +11,9 @@ public sealed class ShortLink
     public DateTimeOffset CreatedAt { get; set; }
 
     public DateTimeOffset? ExpiresAt { get; set; }
+
+    public bool IsExpiredAt(DateTimeOffset instant)
+    {
+        return ExpiresAt.HasValue && instant >= ExpiresAt.Value;
+    }
 }

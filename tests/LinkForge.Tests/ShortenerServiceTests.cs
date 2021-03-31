@@ -66,6 +66,14 @@ public class ShortenerServiceTests
         Assert.True(link.ExpiresAt > System.DateTimeOffset.UtcNow);
     }
 
+    [Fact]
+    public void Resolve_expired_link_returns_null()
+    {
+        var link = _service.Shorten("https://example.com/expired", ttl: TimeSpan.FromDays(-1));
+
+        Assert.Null(_service.Resolve(link.Code));
+    }
+
     private static ShortenerService CreateService()
     {
         var options = new ShortenerOptions();
