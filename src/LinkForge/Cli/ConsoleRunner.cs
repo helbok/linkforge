@@ -90,7 +90,7 @@ public sealed class ConsoleRunner
     {
         foreach (var link in _service.List())
         {
-            Console.WriteLine($"{link.Code}\t{link.Destination}");
+            Console.WriteLine($"{link.Code}\t{link.Hits}\t{link.Destination}");
         }
         return 0;
     }

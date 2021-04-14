@@ -63,6 +63,9 @@ public sealed class ShortenerService
             return null;
         }
 
+        link.Hits += 1;
+        _store.Put(link);
+
         return link;
     }
 

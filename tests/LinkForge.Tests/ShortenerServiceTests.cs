@@ -74,6 +74,19 @@ public class ShortenerServiceTests
         Assert.Null(_service.Resolve(link.Code));
     }
 
+    [Fact]
+    public void Resolve_increments_hit_count()
+    {
+        var link = _service.Shorten("https://example.com/hits");
+
+        _service.Resolve(link.Code);
+        _service.Resolve(link.Code);
+
+        var stored = _service.Resolve(link.Code);
+        Assert.NotNull(stored);
+        Assert.Equal(3, stored!.Hits);
+    }
+
     private static ShortenerService CreateService()
     {
         var options = new ShortenerOptions();
