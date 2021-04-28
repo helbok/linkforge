@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace LinkForge.Core;
 
@@ -17,7 +19,11 @@ public sealed class ShortenerService
         _options = options ?? throw new ArgumentNullException(nameof(options));
     }
 
-    public ShortLink Shorten(string destination, string? customCode = null, TimeSpan? ttl = null)
+    public async Task<ShortLink> ShortenAsync(
+        string destination,
+        string? customCode = null,
+        TimeSpan? ttl = null,
+        CancellationToken ct = default)
     {
         UrlValidator.Validate(destination, _options.MaxUrlLength);
 
@@ -25,13 +31,13 @@ public sealed class ShortenerService
         {
             ValidateCustomCode(customCode);
 
-            if (_store.Get(customCode) != null)
+            if (await _store.GetAsync(customCode).ConfigureAwait(false) != null)
             {
                 throw new InvalidOperationException($"Code '{customCode}' is already in use.");
             }
         }
 
-        foreach (var link in _store.List())
+        foreach (var link in await _store.ListAsync().ConfigureAwait(false))
         {
             if (string.Equals(link.Destination, destination, StringComparison.Ordinal))
             {
@@ -49,14 +55,14 @@ public sealed class ShortenerService
             ExpiresAt = ttl.HasValue ? DateTimeOffset.UtcNow.Add(ttl.Value) : (DateTimeOffset?)null
         };
 
-        _store.Put(created);
+        await _store.PutAsync(created).ConfigureAwait(false);
 
         return created;
     }
 
-    public ShortLink? Resolve(string code)
+    public async Task<ShortLink?> ResolveAsync(string code, CancellationToken ct = default)
     {
-        var link = _store.Get(code);
+        var link = await _store.GetAsync(code).ConfigureAwait(false);
 
         if (link == null || link.IsExpiredAt(DateTimeOffset.UtcNow))
         {
@@ -64,14 +70,14 @@ public sealed class ShortenerService
         }
 
         link.Hits += 1;
-        _store.Put(link);
+        await _store.PutAsync(link).ConfigureAwait(false);
 
         return link;
     }
 
-    public IReadOnlyList<ShortLink> List()
+    public Task<IReadOnlyList<ShortLink>> ListAsync(CancellationToken ct = default)
     {
-        return _store.List();
+        return _store.ListAsync();
     }
 
     private static void ValidateCustomCode(string code)

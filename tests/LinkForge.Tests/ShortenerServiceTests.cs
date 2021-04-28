@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using LinkForge.Core;
 using LinkForge.Storage;
 using Xunit;
@@ -9,80 +11,83 @@ public class ShortenerServiceTests
     private readonly ShortenerService _service = CreateService();
 
     [Fact]
-    public void Shorten_then_resolve_round_trips()
+    public async Task Shorten_then_resolve_round_trips()
     {
-        var link = _service.Shorten("https://example.com/hello");
+        var link = await _service.ShortenAsync("https://example.com/hello");
 
-        var resolved = _service.Resolve(link.Code);
+        var resolved = await _service.ResolveAsync(link.Code);
 
         Assert.NotNull(resolved);
         Assert.Equal("https://example.com/hello", resolved!.Destination);
     }
 
     [Fact]
-    public void Resolve_missing_code_returns_null()
+    public async Task Resolve_missing_code_returns_null()
     {
-        Assert.Null(_service.Resolve("does-not-exist"));
+        Assert.Null(await _service.ResolveAsync("does-not-exist"));
     }
 
     [Fact]
-    public void Shorten_same_destination_returns_same_code()
+    public async Task Shorten_same_destination_returns_same_code()
     {
-        var first = _service.Shorten("https://example.com/dup");
-        var second = _service.Shorten("https://example.com/dup");
+        var first = await _service.ShortenAsync("https://example.com/dup");
+        var second = await _service.ShortenAsync("https://example.com/dup");
 
         Assert.Equal(first.Code, second.Code);
     }
 
     [Fact]
-    public void Shorten_rejects_invalid_url()
+    public async Task Shorten_rejects_invalid_url()
     {
-        Assert.Throws<ArgumentException>(() => _service.Shorten("not-a-url"));
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => _service.ShortenAsync("not-a-url"));
     }
 
     [Fact]
-    public void Shorten_with_custom_code_uses_it()
+    public async Task Shorten_with_custom_code_uses_it()
     {
-        var link = _service.Shorten("https://example.com", customCode: "home");
+        var link = await _service.ShortenAsync("https://example.com", customCode: "home");
 
         Assert.Equal("home", link.Code);
     }
 
     [Fact]
-    public void Shorten_rejects_duplicate_custom_code()
+    public async Task Shorten_rejects_duplicate_custom_code()
     {
-        _service.Shorten("https://example.com/one", customCode: "home");
+        await _service.ShortenAsync("https://example.com/one", customCode: "home");
 
-        Assert.Throws<InvalidOperationException>(
-            () => _service.Shorten("https://example.com/two", customCode: "home"));
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _service.ShortenAsync("https://example.com/two", customCode: "home"));
     }
 
     [Fact]
-    public void Shorten_with_ttl_sets_expiry()
+    public async Task Shorten_with_ttl_sets_expiry()
     {
-        var link = _service.Shorten("https://example.com/ttl", ttl: TimeSpan.FromDays(30));
+        var link = await _service.ShortenAsync(
+            "https://example.com/ttl", ttl: TimeSpan.FromDays(30));
 
         Assert.NotNull(link.ExpiresAt);
         Assert.True(link.ExpiresAt > System.DateTimeOffset.UtcNow);
     }
 
     [Fact]
-    public void Resolve_expired_link_returns_null()
+    public async Task Resolve_expired_link_returns_null()
     {
-        var link = _service.Shorten("https://example.com/expired", ttl: TimeSpan.FromDays(-1));
+        var link = await _service.ShortenAsync(
+            "https://example.com/expired", ttl: TimeSpan.FromDays(-1));
 
-        Assert.Null(_service.Resolve(link.Code));
+        Assert.Null(await _service.ResolveAsync(link.Code));
     }
 
     [Fact]
-    public void Resolve_increments_hit_count()
+    public async Task Resolve_increments_hit_count()
     {
-        var link = _service.Shorten("https://example.com/hits");
+        var link = await _service.ShortenAsync("https://example.com/hits");
 
-        _service.Resolve(link.Code);
-        _service.Resolve(link.Code);
+        await _service.ResolveAsync(link.Code);
+        await _service.ResolveAsync(link.Code);
 
-        var stored = _service.Resolve(link.Code);
+        var stored = await _service.ResolveAsync(link.Code);
         Assert.NotNull(stored);
         Assert.Equal(3, stored!.Hits);
     }

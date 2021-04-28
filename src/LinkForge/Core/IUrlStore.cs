@@ -1,14 +1,15 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace LinkForge.Core;
 
 public interface IUrlStore
 {
-    ShortLink? Get(string code);
+    Task<ShortLink?> GetAsync(string code);
 
-    void Put(ShortLink link);
+    Task PutAsync(ShortLink link);
 
-    bool Remove(string code);
+    Task<bool> RemoveAsync(string code);
 
-    IReadOnlyList<ShortLink> List();
+    Task<IReadOnlyList<ShortLink>> ListAsync();
 }

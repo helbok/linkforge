@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 using LinkForge.Core;
 
 namespace LinkForge.Storage;
@@ -14,29 +16,29 @@ public sealed class JsonUrlStore : IUrlStore
     };
 
     private readonly string _path;
+    private readonly SemaphoreSlim _gate = new SemaphoreSlim(1, 1);
 
     public JsonUrlStore(string path)
     {
         _path = path ?? throw new ArgumentNullException(nameof(path));
     }
 
-    private Dictionary<string, ShortLink> Load()
+    private async Task<Dictionary<string, ShortLink>> LoadAsync(CancellationToken ct = default)
     {
         if (!File.Exists(_path))
         {
             return new Dictionary<string, ShortLink>();
         }
 
-        string json = File.ReadAllText(_path);
+        string json = await File.ReadAllTextAsync(_path, ct).ConfigureAwait(false);
         var links = JsonSerializer.Deserialize<Dictionary<string, ShortLink>>(json, Options);
 
         return links ?? new Dictionary<string, ShortLink>();
     }
 
-    private void Save(Dictionary<string, ShortLink> links)
+    private async Task SaveAsync(Dictionary<string, ShortLink> links, CancellationToken ct = default)
     {
         string json = JsonSerializer.Serialize(links, Options);
-
         string directory = Path.GetDirectoryName(_path);
 
         if (!string.IsNullOrEmpty(directory))
@@ -44,43 +46,57 @@ public sealed class JsonUrlStore : IUrlStore
             Directory.CreateDirectory(directory);
         }
 
-        // Write to a temp file first, then atomically move it into place so a
-        // crash mid-write can never leave a truncated store behind.
         string tempPath = _path + ".tmp";
-        File.WriteAllText(tempPath, json);
+        await File.WriteAllTextAsync(tempPath, json, ct).ConfigureAwait(false);
         File.Move(tempPath, _path, overwrite: true);
     }
 
-    public ShortLink? Get(string code)
+    public async Task<ShortLink?> GetAsync(string code)
     {
-        var links = Load();
+        var links = await LoadAsync().ConfigureAwait(false);
         links.TryGetValue(code, out var link);
         return link;
     }
 
-    public void Put(ShortLink link)
+    public async Task PutAsync(ShortLink link)
     {
-        var links = Load();
-        links[link.Code] = link;
-        Save(links);
-    }
-
-    public bool Remove(string code)
-    {
-        var links = Load();
-        bool removed = links.Remove(code);
-
-        if (removed)
+        await _gate.WaitAsync().ConfigureAwait(false);
+        try
         {
-            Save(links);
+            var links = await LoadAsync().ConfigureAwait(false);
+            links[link.Code] = link;
+            await SaveAsync(links).ConfigureAwait(false);
         }
-
-        return removed;
+        finally
+        {
+            _gate.Release();
+        }
     }
 
-    public IReadOnlyList<ShortLink> List()
+    public async Task<bool> RemoveAsync(string code)
     {
-        var links = Load();
+        await _gate.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            var links = await LoadAsync().ConfigureAwait(false);
+            bool removed = links.Remove(code);
+
+            if (removed)
+            {
+                await SaveAsync(links).ConfigureAwait(false);
+            }
+
+            return removed;
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
+    public async Task<IReadOnlyList<ShortLink>> ListAsync()
+    {
+        var links = await LoadAsync().ConfigureAwait(false);
         return new List<ShortLink>(links.Values);
     }
 }

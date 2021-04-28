@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using LinkForge.Core;
 using LinkForge.Storage;
 using Xunit;
@@ -9,31 +10,31 @@ public class InMemoryUrlStoreTests
     private readonly InMemoryUrlStore _store = new InMemoryUrlStore();
 
     [Fact]
-    public void Put_then_get_returns_the_link()
+    public async Task Put_then_get_returns_the_link()
     {
-        _store.Put(NewLink("abc"));
+        await _store.PutAsync(NewLink("abc"));
 
-        var fetched = _store.Get("abc");
+        var fetched = await _store.GetAsync("abc");
 
         Assert.NotNull(fetched);
         Assert.Equal("https://example.com", fetched!.Destination);
     }
 
     [Fact]
-    public void Get_missing_code_returns_null()
+    public async Task Get_missing_code_returns_null()
     {
-        Assert.Null(_store.Get("missing"));
+        Assert.Null(await _store.GetAsync("missing"));
     }
 
     [Fact]
-    public void Remove_deletes_the_link()
+    public async Task Remove_deletes_the_link()
     {
-        _store.Put(NewLink("abc"));
+        await _store.PutAsync(NewLink("abc"));
 
-        bool removed = _store.Remove("abc");
+        bool removed = await _store.RemoveAsync("abc");
 
         Assert.True(removed);
-        Assert.Null(_store.Get("abc"));
+        Assert.Null(await _store.GetAsync("abc"));
     }
 
     private static ShortLink NewLink(string code) => new ShortLink

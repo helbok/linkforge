@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using LinkForge.Core;
 using LinkForge.Storage;
 
@@ -16,11 +17,11 @@ public sealed class ConsoleRunner
         _service = new ShortenerService(encoder, store, options);
     }
 
-    public int Run(string[] args)
+    public async Task<int> RunAsync(string[] args)
     {
         try
         {
-            return Execute(ArgumentParser.Parse(args));
+            return await ExecuteAsync(ArgumentParser.Parse(args)).ConfigureAwait(false);
         }
         catch (ArgumentException ex)
         {
@@ -35,18 +36,18 @@ public sealed class ConsoleRunner
         }
     }
 
-    private int Execute(Command command)
+    private async Task<int> ExecuteAsync(Command command)
     {
         switch (command)
         {
             case ShortenCommand shorten:
-                return ExecuteShorten(shorten);
+                return await ExecuteShortenAsync(shorten).ConfigureAwait(false);
 
             case ResolveCommand resolve:
-                return ExecuteResolve(resolve);
+                return await ExecuteResolveAsync(resolve).ConfigureAwait(false);
 
             case ListCommand:
-                return ExecuteList();
+                return await ExecuteListAsync().ConfigureAwait(false);
 
             default:
                 PrintUsage();
@@ -54,13 +55,15 @@ public sealed class ConsoleRunner
         }
     }
 
-    private int ExecuteShorten(ShortenCommand shorten)
+    private async Task<int> ExecuteShortenAsync(ShortenCommand shorten)
     {
         var ttl = shorten.TtlDays.HasValue
             ? TimeSpan.FromDays(shorten.TtlDays.Value)
             : (TimeSpan?)null;
 
-        var link = _service.Shorten(shorten.Url, shorten.CustomCode, ttl);
+        var link = await _service.ShortenAsync(shorten.Url, shorten.CustomCode, ttl)
+            .ConfigureAwait(false);
+
         Console.WriteLine($"Shortened: {shorten.Url}");
         Console.WriteLine($"Code:      {link.Code}");
 
@@ -72,9 +75,9 @@ public sealed class ConsoleRunner
         return 0;
     }
 
-    private int ExecuteResolve(ResolveCommand resolve)
+    private async Task<int> ExecuteResolveAsync(ResolveCommand resolve)
     {
-        var resolved = _service.Resolve(resolve.Code);
+        var resolved = await _service.ResolveAsync(resolve.Code).ConfigureAwait(false);
 
         if (resolved is null)
         {
@@ -86,12 +89,15 @@ public sealed class ConsoleRunner
         return 0;
     }
 
-    private int ExecuteList()
+    private async Task<int> ExecuteListAsync()
     {
-        foreach (var link in _service.List())
+        var links = await _service.ListAsync().ConfigureAwait(false);
+
+        foreach (var link in links)
         {
             Console.WriteLine($"{link.Code}\t{link.Hits}\t{link.Destination}");
         }
+
         return 0;
     }
 
@@ -100,7 +106,7 @@ public sealed class ConsoleRunner
         Console.WriteLine("LinkForge — a small URL shortener");
         Console.WriteLine();
         Console.WriteLine("Usage:");
-        Console.WriteLine("  linkforge shorten <url>");
+        Console.WriteLine("  linkforge shorten <url> [--code <code>] [--ttl <days>]");
         Console.WriteLine("  linkforge resolve <code>");
         Console.WriteLine("  linkforge list");
         Console.WriteLine("  linkforge help");
