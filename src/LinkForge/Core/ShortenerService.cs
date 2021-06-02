@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -75,9 +76,13 @@ public sealed class ShortenerService
         return link;
     }
 
-    public Task<IReadOnlyList<ShortLink>> ListAsync(CancellationToken ct = default)
+    public async Task<IReadOnlyList<ShortLink>> ListAsync(CancellationToken ct = default)
     {
-        return _store.ListAsync();
+        var links = await _store.ListAsync().ConfigureAwait(false);
+
+        return links
+            .Where(l => !l.IsExpiredAt(DateTimeOffset.UtcNow))
+            .ToList();
     }
 
     private static void ValidateCustomCode(string code)

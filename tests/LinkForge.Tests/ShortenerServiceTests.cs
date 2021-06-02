@@ -92,6 +92,18 @@ public class ShortenerServiceTests
         Assert.Equal(3, stored!.Hits);
     }
 
+    [Fact]
+    public async Task List_excludes_expired_links()
+    {
+        await _service.ShortenAsync("https://example.com/alive");
+        await _service.ShortenAsync("https://example.com/dead", ttl: TimeSpan.FromDays(-1));
+
+        var links = await _service.ListAsync();
+
+        var link = Assert.Single(links);
+        Assert.Equal("https://example.com/alive", link.Destination);
+    }
+
     private static ShortenerService CreateService()
     {
         var options = new ShortenerOptions();
