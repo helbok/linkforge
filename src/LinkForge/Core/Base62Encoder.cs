@@ -1,11 +1,13 @@
 using System;
-using System.Collections.Generic;
 
 namespace LinkForge.Core;
 
 public sealed class Base62Encoder : IIdEncoder
 {
     private const string Alphabet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    // ceil(log_62(long.MaxValue)) == 11, the longest possible encoded code.
+    private const int MaxEncodedLength = 11;
 
     public string Encode(long id)
     {
@@ -19,15 +21,16 @@ public sealed class Base62Encoder : IIdEncoder
             return Alphabet[0].ToString();
         }
 
-        var stack = new Stack<char>();
+        Span<char> buffer = stackalloc char[MaxEncodedLength];
+        int position = buffer.Length;
 
         while (id > 0)
         {
-            stack.Push(Alphabet[(int)(id % 62)]);
+            buffer[--position] = Alphabet[(int)(id % 62)];
             id /= 62;
         }
 
-        return new string(stack.ToArray());
+        return buffer.Slice(position).ToString();
     }
 
     public long Decode(string code)
@@ -48,7 +51,7 @@ public sealed class Base62Encoder : IIdEncoder
                 throw new FormatException($"'{c}' is not a valid base-62 character.");
             }
 
-            result = result * 62 + index;
+            result = checked(result * 62 + index);
         }
 
         return result;
