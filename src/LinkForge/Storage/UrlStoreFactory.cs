@@ -20,6 +20,9 @@ public static class UrlStoreFactory
             case StoreKind.Json:
                 return new JsonUrlStore(options.StorePath);
 
+            case StoreKind.Sqlite:
+                return new SqliteUrlStore($"Data Source={options.StorePath}");
+
             default:
                 throw new ArgumentOutOfRangeException(nameof(options), "Unknown store kind.");
         }

@@ -3,7 +3,8 @@ namespace LinkForge.Core;
 public enum StoreKind
 {
     Memory,
-    Json
+    Json,
+    Sqlite
 }
 
 public sealed class ShortenerOptions
