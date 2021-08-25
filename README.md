@@ -41,9 +41,14 @@ src/LinkForge/
 - `IUrlStore` — persistence contract for `ShortLink` records.
 - `ShortenerService` — orchestrates shortening and resolving.
 
+## Documentation
+
+- [API reference](docs/api.md)
+- [Examples](docs/examples.md)
+
 ## Building
 
-The project targets .NET Core 3.1.
+The project targets .NET 5.
 
 ```console
 $ dotnet build
