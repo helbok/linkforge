@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using LinkForge.Core;
-using LinkForge.Storage;
 
 namespace LinkForge.Cli;
 
@@ -9,12 +8,9 @@ public sealed class ConsoleRunner
 {
     private readonly ShortenerService _service;
 
-    public ConsoleRunner()
+    public ConsoleRunner(ShortenerService service)
     {
-        var options = new ShortenerOptions();
-        var store = UrlStoreFactory.Create(options);
-        var encoder = new Base62Encoder();
-        _service = new ShortenerService(encoder, store, options);
+        _service = service ?? throw new ArgumentNullException(nameof(service));
     }
 
     public async Task<int> RunAsync(string[] args)
