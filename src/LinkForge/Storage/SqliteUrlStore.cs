@@ -6,7 +6,7 @@ using Microsoft.Data.Sqlite;
 
 namespace LinkForge.Storage;
 
-public sealed class SqliteUrlStore : IUrlStore
+public sealed class SqliteUrlStore : IUrlStore, IDisposable
 {
     private readonly SqliteConnection _connection;
 
@@ -104,5 +104,10 @@ public sealed class SqliteUrlStore : IUrlStore
         }
 
         return links;
+    }
+
+    public void Dispose()
+    {
+        _connection.Dispose();
     }
 }

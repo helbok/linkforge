@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using LinkForge.Cli;
 using LinkForge.Core;
@@ -20,6 +21,16 @@ internal static class Program
         var service = new ShortenerService(encoder, store, options);
         var runner = new ConsoleRunner(service);
 
-        return await runner.RunAsync(args).ConfigureAwait(false);
+        try
+        {
+            return await runner.RunAsync(args).ConfigureAwait(false);
+        }
+        finally
+        {
+            if (store is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
+        }
     }
 }
