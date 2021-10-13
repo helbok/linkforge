@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.0] - 2021-10-13
+
+### Added
+
+- SQLite storage backend.
+- API reference and usage examples.
+
+### Changed
+
+- Console runner receives its dependencies via constructor injection.
+
+### Fixed
+
+- Expired links no longer appear in `list`.
+- SQLite connections are now disposed properly.
+
 ## [1.0.0] - 2021-05-19
 
 ### Added

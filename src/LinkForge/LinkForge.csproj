@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <RootNamespace>LinkForge</RootNamespace>
     <AssemblyName>LinkForge</AssemblyName>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
