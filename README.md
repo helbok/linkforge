@@ -54,3 +54,9 @@ The project targets .NET 5.
 $ dotnet build
 $ dotnet test
 ```
+
+## About this project
+
+LinkForge is a **synthetic educational example**: the project and its commit
+history are fictional, generated to illustrate realistic software engineering
+workflows. See [HISTORY.md](HISTORY.md) for the simulated timeline.
